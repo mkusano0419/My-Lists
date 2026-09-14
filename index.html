@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#07111f">
-  <title>マイリスト</title>
+  <title>自分用図鑑</title>
 
   <style>
     :root {
@@ -88,6 +88,867 @@
       transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
 
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow:
+        0 0 26px rgba(76, 221, 255, 0.65),
+        inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    }
+
+    button:active {
+      transform: translateY(1px) scale(0.99);
+    }
+
+    button.secondary {
+      color: #bdf7ff;
+      border-color: rgba(132, 226, 255, 0.35);
+      background: rgba(93, 177, 214, 0.12);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    button.danger {
+      color: #fff;
+      border-color: rgba(255, 105, 135, 0.8);
+      background: linear-gradient(135deg, #ff4e78, #bd3eff);
+      box-shadow: 0 0 16px rgba(255, 69, 122, 0.38);
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    .toolbar button {
+      flex: 1;
+    }
+
+    .search,
+    input[type="text"] {
+      width: 100%;
+      color: #e4faff;
+      border: 1px solid rgba(113, 225, 255, 0.3);
+      border-radius: 12px;
+      padding: 12px;
+      outline: none;
+      background: rgba(5, 24, 43, 0.72);
+      box-shadow: inset 0 0 18px rgba(0, 191, 255, 0.06);
+    }
+
+    .search {
+      margin-bottom: 12px;
+    }
+
+    .search::placeholder,
+    input[type="text"]::placeholder {
+      color: #7ba8bb;
+    }
+
+    .search:focus,
+    input[type="text"]:focus {
+      border-color: #59e8ff;
+      box-shadow:
+        0 0 0 3px rgba(70, 219, 255, 0.14),
+        0 0 20px rgba(70, 219, 255, 0.18);
+    }
+
+    .list,
+    .form-card,
+    .detail-card {
+      overflow: hidden;
+      border: 1px solid rgba(126, 224, 255, 0.2);
+      border-radius: 16px;
+      background: linear-gradient(
+        135deg,
+        rgba(18, 47, 75, 0.76),
+        rgba(9, 23, 43, 0.68)
+      );
+      box-shadow:
+        0 14px 40px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(211, 251, 255, 0.08);
+      backdrop-filter: blur(16px);
+    }
+
+    .form-card,
+    .detail-card {
+      padding: 16px;
+    }
+
+    .item {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      min-height: 66px;
+      padding: 0 10px 0 0;
+      border-bottom: 1px solid rgba(137, 224, 255, 0.14);
+      color: #eaffff;
+      background: transparent;
+    }
+
+    .item:last-child {
+      border-bottom: 0;
+    }
+
+    .item-content {
+      display: flex;
+      flex: 1;
+      align-items: center;
+      min-width: 0;
+      min-height: 66px;
+      padding: 10px 14px;
+      border: 0;
+      border-radius: 0;
+      color: #eaffff;
+      background: transparent;
+      box-shadow: none;
+      text-align: left;
+    }
+
+    .item-content:hover {
+      transform: none;
+      background: rgba(73, 221, 255, 0.09);
+      box-shadow: none;
+    }
+
+    .thumbnail {
+      width: 44px;
+      height: 44px;
+      flex: 0 0 auto;
+      margin-right: 12px;
+      border: 1px solid rgba(122, 239, 255, 0.6);
+      border-radius: 10px;
+      object-fit: cover;
+      background: #153451;
+      box-shadow: 0 0 12px rgba(74, 221, 255, 0.25);
+    }
+
+    .item-title {
+      overflow: hidden;
+      color: #efffff;
+      font-size: 17px;
+      font-weight: 700;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .item-reading {
+      margin-top: 3px;
+      overflow: hidden;
+      color: #83c9da;
+      font-size: 13px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .favorite-star {
+      flex: 0 0 auto;
+      margin-left: auto;
+      padding: 6px;
+      border: 0;
+      color: #ffd84d;
+      background: transparent;
+      box-shadow: none;
+      font-size: 24px;
+      line-height: 1;
+      text-shadow: 0 0 12px rgba(255, 216, 77, 0.8);
+    }
+
+    .favorite-star:hover {
+      transform: scale(1.12);
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .favorite-star.is-off {
+      color: #567386;
+      text-shadow: none;
+    }
+
+    .empty {
+      padding: 30px 16px;
+      color: #8dc8d7;
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin: 0 0 7px;
+      color: #c7f8ff;
+      font-weight: 700;
+    }
+
+    #detail-reading {
+      color: #92d9e8;
+    }
+
+    input[type="file"] {
+      width: 100%;
+      margin-bottom: 8px;
+      color: #b8e9f4;
+    }
+
+    input[type="file"]::file-selector-button {
+      margin-right: 10px;
+      border: 1px solid rgba(121, 239, 255, 0.65);
+      border-radius: 9px;
+      padding: 9px 11px;
+      color: #02131d;
+      background: #69eaff;
+      cursor: pointer;
+    }
+
+    .images {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .image-card {
+      position: relative;
+      aspect-ratio: 1;
+    }
+
+    .image-card img {
+      width: 100%;
+      height: 100%;
+      border: 1px solid rgba(121, 239, 255, 0.42);
+      border-radius: 11px;
+      object-fit: cover;
+      box-shadow: 0 0 14px rgba(61, 219, 255, 0.2);
+    }
+
+    .delete-image {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      padding: 5px 8px;
+      border: 0;
+      border-radius: 999px;
+      color: #fff;
+      background: rgba(248, 48, 104, 0.88);
+      box-shadow: 0 0 10px rgba(255, 65, 125, 0.65);
+      font-size: 12px;
+    }
+
+    .crop-frame {
+      position: relative;
+      width: min(100%, 360px);
+      aspect-ratio: 1;
+      overflow: hidden;
+      margin: 16px auto;
+      border: 1px solid rgba(126, 240, 255, 0.85);
+      border-radius: 14px;
+      background: #142b40;
+      box-shadow:
+        0 0 26px rgba(69, 223, 255, 0.28),
+        inset 0 0 22px rgba(0, 196, 255, 0.12);
+      touch-action: none;
+    }
+
+    #crop-image {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      z-index: 1;
+      max-width: none;
+      max-height: none;
+      user-select: none;
+      -webkit-user-drag: none;
+      transform: translate(-50%, -50%);
+    }
+
+    .crop-frame::before,
+    .crop-frame::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .crop-frame::before {
+      background:
+        linear-gradient(
+          to right,
+          transparent 33.1%,
+          rgba(205, 249, 255, 0.48) 33.1%,
+          rgba(205, 249, 255, 0.48) 33.55%,
+          transparent 33.55%,
+          transparent 66.45%,
+          rgba(205, 249, 255, 0.48) 66.45%,
+          rgba(205, 249, 255, 0.48) 66.9%,
+          transparent 66.9%
+        );
+    }
+
+    .crop-frame::after {
+      background:
+        linear-gradient(
+          to bottom,
+          transparent 33.1%,
+          rgba(205, 249, 255, 0.48) 33.1%,
+          rgba(205, 249, 255, 0.48) 33.55%,
+          transparent 33.55%,
+          transparent 66.45%,
+          rgba(205, 249, 255, 0.48) 66.45%,
+          rgba(205, 249, 255, 0.48) 66.9%,
+          transparent 66.9%
+        );
+    }
+
+    #crop-zoom {
+      width: 100%;
+      accent-color: #59e8ff;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>自分用図鑑</h1>
+  </header>
+
+  <main>
+    <section id="list-page">
+      <div class="toolbar">
+        <button id="add-button">＋ 登録する</button>
+      </div>
+
+      <input id="search-input" class="search" type="search" placeholder="名前・よみで検索">
+      <div id="item-list" class="list"></div>
+    </section>
+
+    <section id="form-page" class="hidden">
+      <div class="toolbar">
+        <button class="secondary back-button">← 戻る</button>
+      </div>
+
+      <div class="form-card">
+        <label for="name-input">名前</label>
+        <input id="name-input" type="text" placeholder="例：りんご">
+
+        <label for="reading-input">よみ（ひらがな）</label>
+        <input id="reading-input" type="text" placeholder="例：りんご">
+
+        <button id="save-button">登録する</button>
+      </div>
+    </section>
+
+    <section id="detail-page" class="hidden">
+      <div class="toolbar">
+        <button class="secondary back-button">← 一覧へ</button>
+      </div>
+
+      <div class="detail-card">
+        <h2 id="detail-name"></h2>
+        <p id="detail-reading"></p>
+
+        <label for="image-input">画像を追加</label>
+        <input id="image-input" type="file" accept="image/*">
+
+        <div id="image-list" class="images"></div>
+
+        <div class="toolbar">
+          <button id="delete-item-button" class="danger">この項目を削除</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="crop-page" class="hidden">
+      <div class="toolbar">
+        <button id="cancel-crop-button" class="secondary">← キャンセル</button>
+        <button id="confirm-crop-button">この範囲で保存</button>
+      </div>
+
+      <div class="detail-card">
+        <p>画像をドラッグして位置を調整してね</p>
+
+        <div class="crop-frame">
+          <img id="crop-image" alt="トリミング対象">
+        </div>
+
+        <label for="crop-zoom">拡大・縮小</label>
+        <input id="crop-zoom" type="range" min="1" max="3" step="0.01" value="1">
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const DB_NAME = "my-zukan-db";
+    const DB_VERSION = 1;
+    const ITEM_STORE = "items";
+
+    let db;
+    let currentItemId = null;
+
+    let cropObjectUrl = null;
+    let cropScale = 1;
+    let cropX = 0;
+    let cropY = 0;
+    let cropBaseScale = 1;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let dragStartCropX = 0;
+    let dragStartCropY = 0;
+
+    function openDatabase() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+        request.onupgradeneeded = (event) => {
+          const database = event.target.result;
+
+          if (!database.objectStoreNames.contains(ITEM_STORE)) {
+            const store = database.createObjectStore(ITEM_STORE, {
+              keyPath: "id",
+              autoIncrement: true
+            });
+
+            store.createIndex("reading", "reading", { unique: false });
+          }
+        };
+
+        request.onsuccess = (event) => {
+          db = event.target.result;
+          resolve();
+        };
+
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    function addItem(item) {
+      return new Promise((resolve, reject) => {
+        const request = db
+          .transaction(ITEM_STORE, "readwrite")
+          .objectStore(ITEM_STORE)
+          .add(item);
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    function getAllItems() {
+      return new Promise((resolve, reject) => {
+        const request = db
+          .transaction(ITEM_STORE, "readonly")
+          .objectStore(ITEM_STORE)
+          .getAll();
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    function getItem(id) {
+      return new Promise((resolve, reject) => {
+        const request = db
+          .transaction(ITEM_STORE, "readonly")
+          .objectStore(ITEM_STORE)
+          .get(id);
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    function updateItem(item) {
+      return new Promise((resolve, reject) => {
+        const request = db
+          .transaction(ITEM_STORE, "readwrite")
+          .objectStore(ITEM_STORE)
+          .put(item);
+
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    function deleteItem(id) {
+      return new Promise((resolve, reject) => {
+        const request = db
+          .transaction(ITEM_STORE, "readwrite")
+          .objectStore(ITEM_STORE)
+          .delete(id);
+
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    function showPage(pageName) {
+      document.querySelectorAll("main > section").forEach((page) => {
+        page.classList.add("hidden");
+      });
+
+      document.querySelector(`#${pageName}`).classList.remove("hidden");
+    }
+
+    function escapeHtml(text) {
+      const element = document.createElement("div");
+      element.textContent = text;
+      return element.innerHTML;
+    }
+
+    async function renderList() {
+      const list = document.querySelector("#item-list");
+      const query = document.querySelector("#search-input").value.trim();
+
+      let items = await getAllItems();
+
+      items.sort((a, b) => {
+        const favoriteDiff =
+          Number(Boolean(b.favorite)) - Number(Boolean(a.favorite));
+
+        if (favoriteDiff !== 0) {
+          return favoriteDiff;
+        }
+
+        return a.reading.localeCompare(b.reading, "ja");
+      });
+
+      if (query) {
+        items = items.filter((item) =>
+          item.name.includes(query) || item.reading.includes(query)
+        );
+      }
+
+      list.innerHTML = "";
+
+      if (items.length === 0) {
+        list.innerHTML = '<div class="empty">まだ登録がありません</div>';
+        return;
+      }
+
+      for (const item of items) {
+        const row = document.createElement("div");
+        row.className = "item";
+
+        const contentButton = document.createElement("button");
+        contentButton.className = "item-content";
+
+        const thumbnail = document.createElement("img");
+        thumbnail.className = "thumbnail";
+        thumbnail.alt = "";
+
+        if (item.images?.length > 0) {
+          thumbnail.src = URL.createObjectURL(item.images[0]);
+        }
+
+        const text = document.createElement("div");
+        text.style.minWidth = "0";
+        text.innerHTML = `
+          <div class="item-title">${escapeHtml(item.name)}</div>
+          <div class="item-reading">${escapeHtml(item.reading)}</div>
+        `;
+
+        const favoriteButton = document.createElement("button");
+        favoriteButton.className = `favorite-star ${item.favorite ? "" : "is-off"}`;
+        favoriteButton.textContent = item.favorite ? "★" : "☆";
+        favoriteButton.setAttribute(
+          "aria-label",
+          item.favorite ? "お気に入りを解除" : "お気に入りに追加"
+        );
+
+        contentButton.append(thumbnail, text);
+
+        contentButton.addEventListener("click", () => {
+          openDetail(item.id);
+        });
+
+        favoriteButton.addEventListener("click", async () => {
+          item.favorite = !item.favorite;
+
+          await updateItem(item);
+          await renderList();
+        });
+
+        row.append(contentButton, favoriteButton);
+        list.append(row);
+      }
+    }
+
+    async function openDetail(id) {
+      currentItemId = id;
+
+      const item = await getItem(id);
+      document.querySelector("#detail-name").textContent = item.name;
+      document.querySelector("#detail-reading").textContent = `よみ：${item.reading}`;
+
+      renderImages(item);
+      showPage("detail-page");
+    }
+
+    function renderImages(item) {
+      const imageList = document.querySelector("#image-list");
+      imageList.innerHTML = "";
+
+      item.images ??= [];
+
+      item.images.forEach((imageBlob, index) => {
+        const card = document.createElement("div");
+        card.className = "image-card";
+
+        const image = document.createElement("img");
+        image.src = URL.createObjectURL(imageBlob);
+        image.alt = `${item.name}の画像`;
+
+        const removeButton = document.createElement("button");
+        removeButton.className = "delete-image";
+        removeButton.textContent = "削除";
+
+        removeButton.addEventListener("click", async () => {
+          item.images.splice(index, 1);
+          await updateItem(item);
+          renderImages(item);
+        });
+
+        card.append(image, removeButton);
+        imageList.append(card);
+      });
+    }
+
+    function updateCropPreview() {
+      const image = document.querySelector("#crop-image");
+      const frame = document.querySelector(".crop-frame");
+      const frameSize = frame.clientWidth;
+
+      if (!image.naturalWidth || !image.naturalHeight || !frameSize) return;
+
+      const width = image.naturalWidth * cropBaseScale * cropScale;
+      const height = image.naturalHeight * cropBaseScale * cropScale;
+
+      const maxX = Math.max(0, (width - frameSize) / 2);
+      const maxY = Math.max(0, (height - frameSize) / 2);
+
+      cropX = Math.max(-maxX, Math.min(maxX, cropX));
+      cropY = Math.max(-maxY, Math.min(maxY, cropY));
+
+      image.style.width = `${width}px`;
+      image.style.height = `${height}px`;
+      image.style.transform =
+        `translate(calc(-50% + ${cropX}px), calc(-50% + ${cropY}px))`;
+    }
+
+    function clearCropData() {
+      if (cropObjectUrl) {
+        URL.revokeObjectURL(cropObjectUrl);
+      }
+
+      cropObjectUrl = null;
+      cropScale = 1;
+      cropX = 0;
+      cropY = 0;
+      cropBaseScale = 1;
+
+      document.querySelector("#crop-zoom").value = "1";
+      document.querySelector("#crop-image").removeAttribute("src");
+    }
+
+    document.querySelector("#add-button").addEventListener("click", () => {
+      document.querySelector("#name-input").value = "";
+      document.querySelector("#reading-input").value = "";
+      showPage("form-page");
+    });
+
+    document.querySelector("#save-button").addEventListener("click", async () => {
+      const name = document.querySelector("#name-input").value.trim();
+      const reading = document.querySelector("#reading-input").value
+        .trim()
+        .normalize("NFKC");
+
+      if (!name || !reading) {
+        alert("名前とよみを入力してね");
+        return;
+      }
+
+      await addItem({
+        name,
+        reading,
+        favorite: false,
+        images: [],
+        createdAt: Date.now()
+      });
+
+      await renderList();
+      showPage("list-page");
+    });
+
+    document.querySelector("#image-input").addEventListener("change", (event) => {
+      const [file] = event.target.files;
+
+      if (!file || !currentItemId) return;
+
+      clearCropData();
+
+      cropScale = 1;
+      cropX = 0;
+      cropY = 0;
+      document.querySelector("#crop-zoom").value = "1";
+
+      showPage("crop-page");
+
+      cropObjectUrl = URL.createObjectURL(file);
+
+      const cropImage = document.querySelector("#crop-image");
+
+      cropImage.onload = () => {
+        const frame = document.querySelector(".crop-frame");
+        const frameSize = frame.clientWidth;
+
+        if (!frameSize) {
+          alert("トリミング画面の準備に失敗しました");
+          clearCropData();
+          showPage("detail-page");
+          return;
+        }
+
+        cropBaseScale = Math.max(
+          frameSize / cropImage.naturalWidth,
+          frameSize / cropImage.naturalHeight
+        );
+
+        updateCropPreview();
+      };
+
+      cropImage.onerror = () => {
+        alert("この画像は読み込めませんでした");
+        clearCropData();
+        showPage("detail-page");
+      };
+
+      cropImage.src = cropObjectUrl;
+      event.target.value = "";
+    });
+
+    document.querySelector("#crop-zoom").addEventListener("input", (event) => {
+      cropScale = Number(event.target.value);
+      updateCropPreview();
+    });
+
+    const cropFrame = document.querySelector(".crop-frame");
+
+    cropFrame.addEventListener("pointerdown", (event) => {
+      cropFrame.setPointerCapture(event.pointerId);
+
+      dragStartX = event.clientX;
+      dragStartY = event.clientY;
+      dragStartCropX = cropX;
+      dragStartCropY = cropY;
+    });
+
+    cropFrame.addEventListener("pointermove", (event) => {
+      if (!cropFrame.hasPointerCapture(event.pointerId)) return;
+
+      cropX = dragStartCropX + (event.clientX - dragStartX);
+      cropY = dragStartCropY + (event.clientY - dragStartY);
+
+      updateCropPreview();
+    });
+
+    cropFrame.addEventListener("pointerup", (event) => {
+      if (cropFrame.hasPointerCapture(event.pointerId)) {
+        cropFrame.releasePointerCapture(event.pointerId);
+      }
+    });
+
+    document.querySelector("#confirm-crop-button").addEventListener("click", async () => {
+      if (!cropObjectUrl || !currentItemId) return;
+
+      const cropImage = document.querySelector("#crop-image");
+      const frame = document.querySelector(".crop-frame");
+      const frameSize = frame.clientWidth;
+
+      if (!cropImage.naturalWidth || !cropImage.naturalHeight || !frameSize) {
+        alert("画像の準備が完了していません");
+        return;
+      }
+
+      const previewScale = cropBaseScale * cropScale;
+      const sourceSize = frameSize / previewScale;
+
+      const sourceX =
+        (cropImage.naturalWidth - sourceSize) / 2 - cropX / previewScale;
+
+      const sourceY =
+        (cropImage.naturalHeight - sourceSize) / 2 - cropY / previewScale;
+
+      const canvas = document.createElement("canvas");
+      canvas.width = 1000;
+      canvas.height = 1000;
+
+      const context = canvas.getContext("2d");
+
+      context.drawImage(
+        cropImage,
+        sourceX,
+        sourceY,
+        sourceSize,
+        sourceSize,
+        0,
+        0,
+        1000,
+        1000
+      );
+
+      const croppedBlob = await new Promise((resolve) => {
+        canvas.toBlob(resolve, "image/jpeg", 0.88);
+      });
+
+      if (!croppedBlob) {
+        alert("画像の保存に失敗しました");
+        return;
+      }
+
+      const item = await getItem(currentItemId);
+      item.images ??= [];
+      item.images.push(croppedBlob);
+
+      await updateItem(item);
+
+      clearCropData();
+      await openDetail(currentItemId);
+    });
+
+    document.querySelector("#cancel-crop-button").addEventListener("click", () => {
+      clearCropData();
+      showPage("detail-page");
+    });
+
+    document.querySelector("#delete-item-button").addEventListener("click", async () => {
+      if (!currentItemId) return;
+
+      if (!confirm("この項目と画像を削除しますか？")) return;
+
+      await deleteItem(currentItemId);
+      currentItemId = null;
+
+      await renderList();
+      showPage("list-page");
+    });
+
+    document.querySelectorAll(".back-button").forEach((button) => {
+      button.addEventListener("click", async () => {
+        await renderList();
+        showPage("list-page");
+      });
+    });
+
+    document.querySelector("#search-input").addEventListener("input", renderList);
+
+    (async () => {
+      await openDatabase();
+      await renderList();
+    })();
+  </script>
+</body>
+</html>
     button:hover {
       transform: translateY(-1px);
       box-shadow:
